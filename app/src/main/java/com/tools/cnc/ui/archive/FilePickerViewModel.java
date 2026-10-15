@@ -12,17 +12,20 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * File browser backing the picker screen. Works in two modes:
+ * File browser backing the picker screen. Works in three modes:
  * <ul>
  *   <li>{@link #MODE_COMPRESS} — lists every file and folder, multi-select.</li>
  *   <li>{@link #MODE_DECOMPRESS} — lists folders plus ZIP/RAR archives only,
  *       single-select.</li>
+ *   <li>{@link #MODE_PICK_DIR} — lists folders only; the current folder itself is the
+ *       result (used to choose the compression output directory).</li>
  * </ul>
  */
 public class FilePickerViewModel extends ViewModel {
 
     public static final String MODE_COMPRESS = "compress";
     public static final String MODE_DECOMPRESS = "decompress";
+    public static final String MODE_PICK_DIR = "pick_dir";
 
     private final MutableLiveData<List<FileItem>> fileList = new MutableLiveData<>();
     private final MutableLiveData<String> currentPath = new MutableLiveData<>();
@@ -52,6 +55,10 @@ public class FilePickerViewModel extends ViewModel {
 
     public boolean isCompressMode() {
         return MODE_COMPRESS.equals(mode);
+    }
+
+    public boolean isDirMode() {
+        return MODE_PICK_DIR.equals(mode);
     }
 
     public void navigateTo(File dir) {
@@ -169,8 +176,13 @@ public class FilePickerViewModel extends ViewModel {
                 }
                 FileItem item = new FileItem(file);
                 // Decompress mode only shows folders and supported archives.
-                if (!isCompressMode() && item.getType() != FileItem.FileType.FOLDER
+                if (FilePickerViewModel.MODE_DECOMPRESS.equals(mode)
+                        && item.getType() != FileItem.FileType.FOLDER
                         && !item.isArchive()) {
+                    continue;
+                }
+                // Directory picker only shows folders.
+                if (isDirMode() && item.getType() != FileItem.FileType.FOLDER) {
                     continue;
                 }
                 items.add(item);

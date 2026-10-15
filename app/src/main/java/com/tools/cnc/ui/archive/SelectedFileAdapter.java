@@ -45,7 +45,10 @@ public class SelectedFileAdapter extends RecyclerView.Adapter<SelectedFileAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CompressEntry entry = entries.get(position);
         holder.tvFileName.setText(entry.getDisplayName());
-        holder.tvFileSize.setText(FileUtils.formatFileSize(entry.getFileSize()));
+        String size = FileUtils.formatFileSize(entry.getFileSize());
+        holder.tvFileSize.setText(entry.isDirectory()
+                ? holder.itemView.getContext().getString(R.string.entry_folder_size, size)
+                : size);
         holder.btnRemove.setOnClickListener(v -> {
             if (removeListener != null) {
                 removeListener.onRemove(holder.getAdapterPosition());

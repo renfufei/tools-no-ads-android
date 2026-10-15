@@ -2,18 +2,23 @@ package com.tools.cnc.ui.archive;
 
 import android.net.Uri;
 
-import java.io.File;
-
+/**
+ * One item queued for compression. The entry always keeps the original {@link Uri};
+ * the compression step compresses {@code file://} entries in place and only copies
+ * {@code content://} entries into the app cache.
+ */
 public class CompressEntry {
+
     private final Uri uri;
     private final String displayName;
     private final long fileSize;
-    private File cachedFile;
+    private final boolean directory;
 
-    public CompressEntry(Uri uri, String displayName, long fileSize) {
+    public CompressEntry(Uri uri, String displayName, long fileSize, boolean directory) {
         this.uri = uri;
         this.displayName = displayName;
         this.fileSize = fileSize;
+        this.directory = directory;
     }
 
     public Uri getUri() {
@@ -24,15 +29,12 @@ public class CompressEntry {
         return displayName;
     }
 
+    /** Size in bytes; for a directory this is the recursive size of its contents. */
     public long getFileSize() {
         return fileSize;
     }
 
-    public File getCachedFile() {
-        return cachedFile;
-    }
-
-    public void setCachedFile(File cachedFile) {
-        this.cachedFile = cachedFile;
+    public boolean isDirectory() {
+        return directory;
     }
 }

@@ -17,11 +17,27 @@
     <string name="archive_decompress">解压文件</string>
     <string name="archive_decompress_desc">选择 ZIP/RAR 压缩包，解压到本地</string>
     <string name="picker_hint_compress">点按文件夹可进入 · 点右侧「选择」选中该文件夹</string>
-    <string name="picker_hint_decompress">仅列出 ZIP/RAR 压缩包，点按即可选中</string>
+    <string name="picker_hint_decompress">点按压缩包即可选中，选中的文件右侧会显示对勾</string>
     <string name="picker_select">选择</string>
     <string name="picker_selected">已选</string>
     <string name="picker_title_decompress">选择压缩包</string>
     <string name="picker_empty_decompress">此目录没有 ZIP/RAR 压缩包</string>
+    <string name="picker_title_dir">选择输出目录</string>
+    <string name="picker_hint_dir">点按文件夹进入 · 底部按钮选定当前目录</string>
+    <string name="picker_empty_dir">此目录没有子文件夹</string>
+    <string name="picker_use_current_dir">使用此目录</string>
+    <string name="picker_current_dir">当前目录：%1$s</string>
+    <string name="compress_output_settings">输出设置</string>
+    <string name="compress_change_dir">更改</string>
+    <string name="compress_default_name">压缩包-%1$s.zip</string>
+    <string name="compress_name_empty">请填写输出文件名</string>
+    <string name="compress_dir_unusable">输出目录不可用：%1$s</string>
+    <string name="compress_options_title">压缩选项</string>
+    <string name="compress_options_summary_plain">无密码 · 等级 %1$d</string>
+    <string name="compress_options_summary_locked">已加密 · 等级 %1$d</string>
+    <string name="compress_password_empty">请填写压缩密码</string>
+    <string name="compress_level_value">%1$d</string>
+    <string name="entry_folder_size">文件夹 · %1$s</string>
     <string name="decompress_output_hint">解压到：%s</string>
     <string name="picker_start_decompress">解压</string>
     <string name="picker_enter_folder">进入</string>
@@ -51,6 +67,28 @@
     <string name="insufficient_storage">存储空间不足</string>
     <string name="success">操作成功</string>
     <string name="error">操作失败</string>
+
+    <!-- Error dialog -->
+    <string name="error_ok">知道了</string>
+    <string name="error_copy">复制</string>
+    <string name="error_copied">错误信息已复制到剪贴板</string>
+
+    <!-- Decompress confirm screen -->
+    <string name="decompress_title">解压文件</string>
+    <string name="decompress_archive_section">压缩包</string>
+    <string name="decompress_target_section">解压到</string>
+    <string name="decompress_target_dir">目标目录</string>
+    <string name="decompress_change">更改</string>
+    <string name="decompress_folder_name">输出文件夹名</string>
+    <string name="decompress_folder_empty">请填写输出文件夹名</string>
+    <string name="decompress_folder_invalid">文件夹名不能包含 / 或 \\</string>
+    <string name="decompress_final_path">最终目录：%1$s</string>
+    <string name="decompress_encrypted_hint">该压缩包已加密，请输入密码</string>
+    <string name="decompress_start">开始解压</string>
+    <string name="decompress_done">解压完成：%1$s</string>
+    <string name="decompress_info">%1$s · %2$s · %3$s</string>
+    <string name="decompress_rar5_warning">该文件是 RAR5 格式（WinRAR 5.0 及以上默认），当前仅支持解压 RAR4，无法处理该文件。</string>
+    <string name="picker_selected_mark">已选中</string>
 
     <!-- Image Tools -->
     <string name="image_tools_title">图片工具</string>
@@ -113,6 +151,28 @@
     <string name="qr_content_empty">请输入要生成的内容</string>
     <string name="qr_generate_failed">生成失败，内容可能过长</string>
     <string name="qr_storage_permission_msg">需要存储权限才能保存二维码图片</string>
+
+    <!-- Crop black border -->
+    <string name="crop_border_hint">选择一张图片开始</string>
+    <string name="crop_border_reselect">重新选择图片</string>
+    <string name="crop_border_auto_detect">自动识别状态栏 / 导航栏</string>
+    <string name="crop_border_ignore_top">顶部忽略</string>
+    <string name="crop_border_ignore_bottom">底部忽略</string>
+    <string name="crop_border_advanced">高级参数</string>
+    <string name="crop_border_threshold">黑边阈值</string>
+    <string name="crop_border_noise">抗干扰</string>
+    <string name="crop_border_reset">重置</string>
+    <string name="crop_border_save">保存到本地</string>
+    <string name="crop_border_cropping">正在处理…</string>
+    <string name="crop_border_size_info">%1$d×%2$d → %3$d×%4$d</string>
+    <string name="crop_border_trim_info">去除 上 %1$d / 下 %2$d / 左 %3$d / 右 %4$d</string>
+    <string name="crop_border_value_percent">%1$d%% · %2$dpx</string>
+    <string name="crop_border_value_plain">%1$d</string>
+    <string name="crop_border_value_percent_only">%1$d%%</string>
+    <string name="crop_border_auto_done">已识别：上 %1$dpx / 下 %2$dpx，可拖动琥珀色虚线微调</string>
+    <string name="crop_border_auto_failed">识别失败，请手动拖动调整</string>
+    <string name="crop_border_no_image">请先选择图片</string>
+    <string name="crop_border_saved">已保存：%1$s</string>
 
     <!-- Permissions -->
     <string name="permission_required">需要存储权限</string>

@@ -14,8 +14,13 @@ import net.lingala.zip4j.model.enums.EncryptionMethod;
 import net.lingala.zip4j.progress.ProgressMonitor;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,6 +30,11 @@ import java.util.concurrent.Executors;
  * <p>All I/O operations run on a dedicated background thread managed by an
  * {@link ExecutorService}. Progress and result callbacks are always delivered on
  * the Android main thread via a {@link Handler}.
+ *
+ * <p>Extraction is performed entry by entry with streams owned by this class rather
+ * than through {@code ZipFile.extractFile()}: that keeps every destination path under
+ * our control and turns failures into actionable messages (missing permissions, an
+ * entry clashing with an existing folder, a wrong password, …).
  */
 public class ZipHandler {
 
@@ -40,7 +50,12 @@ public class ZipHandler {
     /**
      * Compresses a list of files into a ZIP archive.
      *
-     * @param files            Files to include in the archive.
+     * <p>Entries are added one by one, synchronously, on the worker thread. zip4j's own
+     * run-in-thread mode is deliberately not used: it rejects any new operation while the
+     * previous one is still running ("Zip4j is in busy state"), which broke every archive
+     * containing more than one entry. Progress is polled from a separate thread instead.
+     *
+     * @param files            Files (or folders) to include in the archive.
      * @param outputZip        Destination ZIP file (will be created or overwritten).
      * @param password         Optional password. Pass {@code null} or an empty string
      *                         to create an unencrypted archive. When non-empty, AES-256
@@ -59,19 +74,20 @@ public class ZipHandler {
             ArchiveCallback callback) {
 
         if (files == null || files.isEmpty()) {
-            postError(callback, "File list is empty.");
+            postError(callback, "待压缩的文件列表为空。");
             return;
         }
         if (outputZip == null) {
-            postError(callback, "Output ZIP path must not be null.");
+            postError(callback, "输出文件路径不能为空。");
             return;
         }
 
         executor.execute(() -> {
+            ProgressPoller poller = null;
             try {
                 // Delete any pre-existing archive so zip4j always starts fresh.
                 if (outputZip.exists() && !outputZip.delete()) {
-                    postError(callback, "Could not overwrite existing file: " + outputZip.getPath());
+                    postError(callback, "无法覆盖已存在的文件：" + outputZip.getPath());
                     return;
                 }
 
@@ -83,42 +99,47 @@ public class ZipHandler {
                         ? new ZipFile(outputZip, password.toCharArray())
                         : new ZipFile(outputZip);
 
-                // Enable run-in-thread mode so we can poll the ProgressMonitor.
-                zipFile.setRunInThread(true);
+                // Blocking add calls; progress is reported by the poller below.
+                zipFile.setRunInThread(false);
 
-                // Add all files.
-                for (File file : files) {
+                long[] sizes = new long[files.size()];
+                long totalBytes = 0;
+                for (int i = 0; i < files.size(); i++) {
+                    sizes[i] = Math.max(1, sizeOf(files.get(i)));
+                    totalBytes += sizes[i];
+                }
+
+                poller = new ProgressPoller(zipFile, totalBytes, callback);
+                poller.start();
+
+                long doneBytes = 0;
+                for (int i = 0; i < files.size(); i++) {
+                    File file = files.get(i);
+                    poller.onEntryStarted(doneBytes, sizes[i]);
+
                     if (file.isDirectory()) {
                         zipFile.addFolder(file, params);
                     } else {
                         zipFile.addFile(file, params);
                     }
+
+                    doneBytes += sizes[i];
                 }
 
-                // Poll until zip4j finishes the background processing it started.
-                ProgressMonitor monitor = zipFile.getProgressMonitor();
-                while (!monitor.getState().equals(ProgressMonitor.State.READY)) {
-                    int pct = monitor.getPercentDone();
-                    String current = monitor.getFileName() != null ? monitor.getFileName() : "";
-                    postProgress(callback, pct, current);
-
-                    Thread.sleep(PROGRESS_POLL_INTERVAL_MS);
-                }
-
-                if (monitor.getResult().equals(ProgressMonitor.Result.ERROR)) {
-                    Exception cause = monitor.getException();
-                    postError(callback, cause != null ? cause.getMessage() : "Unknown compression error.");
-                    return;
-                }
+                poller.stopPolling();
+                poller = null;
 
                 postProgress(callback, 100, "");
                 postSuccess(callback, outputZip.getAbsolutePath());
 
             } catch (ZipException e) {
-                postError(callback, "ZIP error during compression: " + e.getMessage());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                postError(callback, "Compression interrupted.");
+                postError(callback, "压缩失败：" + ArchiveIO.describe(e));
+            } catch (Throwable t) {
+                postError(callback, "压缩失败：" + ArchiveIO.describe(t));
+            } finally {
+                if (poller != null) {
+                    poller.stopPolling();
+                }
             }
         });
     }
@@ -126,9 +147,9 @@ public class ZipHandler {
     /**
      * Extracts a ZIP archive to the specified output directory.
      *
-     * <p>Zip Slip protection is applied: any entry whose canonical path does not
-     * start with the canonical path of {@code outputDir} is skipped with a warning
-     * and does not cause the entire extraction to fail.
+     * <p>Zip Slip protection is applied: an entry whose canonical path does not start
+     * with the canonical path of {@code outputDir} is skipped instead of aborting the
+     * whole extraction.
      *
      * @param zipFile   ZIP archive to extract.
      * @param outputDir Directory into which files are extracted (created if absent).
@@ -143,18 +164,34 @@ public class ZipHandler {
             ArchiveCallback callback) {
 
         if (zipFile == null || !zipFile.exists()) {
-            postError(callback, "ZIP file does not exist: " + (zipFile != null ? zipFile.getPath() : "null"));
+            postError(callback, "压缩包不存在："
+                    + (zipFile != null ? zipFile.getPath() : "null"));
+            return;
+        }
+        if (zipFile.isDirectory()) {
+            postError(callback, "所选路径是一个文件夹，不是压缩包：\n" + zipFile.getPath());
             return;
         }
         if (outputDir == null) {
-            postError(callback, "Output directory must not be null.");
+            postError(callback, "输出目录不能为空。");
             return;
         }
 
         executor.execute(() -> {
+            String currentEntry = null;
             try {
                 if (!outputDir.exists() && !outputDir.mkdirs()) {
-                    postError(callback, "Could not create output directory: " + outputDir.getPath());
+                    postError(callback, "无法创建输出目录：\n" + outputDir.getAbsolutePath()
+                            + "\n\n请检查存储权限，或换一个输出目录。");
+                    return;
+                }
+                if (!ArchiveIO.isWritable(outputDir)) {
+                    postError(callback, "输出目录不可写：\n" + outputDir.getAbsolutePath()
+                            + "\n\n常见原因：\n"
+                            + "· 应用没有存储权限（Android 11 及以上需在系统设置中授予「所有文件访问」权限）\n"
+                            + "· 目标目录属于其他应用或系统保护目录\n"
+                            + "· 存储空间不足\n\n"
+                            + "请更换输出目录后重试。");
                     return;
                 }
 
@@ -164,8 +201,20 @@ public class ZipHandler {
                         ? new ZipFile(zipFile, password.toCharArray())
                         : new ZipFile(zipFile);
 
+                if (!zip.isValidZipFile()) {
+                    postError(callback, "文件不是有效的 ZIP 压缩包，或文件已损坏：\n"
+                            + zipFile.getAbsolutePath()
+                            + "\n\n请确认文件完整（大小：" + zipFile.length() + " 字节）。");
+                    return;
+                }
+                if (zip.isEncrypted() && !usePassword) {
+                    postError(callback, "该压缩包已加密，请输入密码后重试。");
+                    return;
+                }
+
                 List<FileHeader> headers = zip.getFileHeaders();
                 if (headers == null || headers.isEmpty()) {
+                    postProgress(callback, 100, "");
                     postSuccess(callback, outputDir.getAbsolutePath());
                     return;
                 }
@@ -179,18 +228,46 @@ public class ZipHandler {
                 int processed = 0;
 
                 for (FileHeader header : headers) {
-                    String entryName = header.getFileName();
-
-                    // --- Zip Slip protection ---
-                    File entryDest = new File(outputDir, entryName);
-                    String canonicalEntry = entryDest.getCanonicalPath();
-                    if (!canonicalEntry.startsWith(canonicalOutputDir)) {
-                        // Skip malicious path traversal entry.
+                    String entryName = ArchiveIO.normalizeEntryName(header.getFileName());
+                    currentEntry = entryName;
+                    if (entryName.isEmpty()) {
                         processed++;
                         continue;
                     }
 
-                    zip.extractFile(header, outputDir.getAbsolutePath());
+                    File destFile = new File(outputDir, entryName);
+
+                    // --- Zip Slip protection ---
+                    String canonicalDest = destFile.getCanonicalPath();
+                    if (!canonicalDest.startsWith(canonicalOutputDir)) {
+                        processed++;
+                        continue;
+                    }
+
+                    if (header.isDirectory() || entryName.endsWith("/")) {
+                        if (!destFile.exists() && !destFile.mkdirs()) {
+                            postError(callback, "无法创建目录：\n" + destFile.getAbsolutePath());
+                            return;
+                        }
+                    } else {
+                        File parent = destFile.getParentFile();
+                        if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                            postError(callback, "无法创建目录：\n" + parent.getAbsolutePath());
+                            return;
+                        }
+                        if (destFile.isDirectory()) {
+                            postError(callback, "解压失败：压缩包中的文件「" + entryName
+                                    + "」与已存在的同名文件夹冲突。\n目标路径："
+                                    + destFile.getAbsolutePath()
+                                    + "\n\n请删除或重命名该文件夹，或更换输出文件夹名后重试。");
+                            return;
+                        }
+
+                        try (InputStream in = zip.getInputStream(header);
+                             OutputStream out = new FileOutputStream(destFile)) {
+                            ArchiveIO.copy(in, out);
+                        }
+                    }
 
                     processed++;
                     int pct = (int) ((processed / (double) total) * 100);
@@ -201,9 +278,20 @@ public class ZipHandler {
                 postSuccess(callback, outputDir.getAbsolutePath());
 
             } catch (ZipException e) {
-                postError(callback, "ZIP error during extraction: " + e.getMessage());
+                postError(callback, describeZipException(e, currentEntry));
+            } catch (FileNotFoundException e) {
+                postError(callback, "解压失败：目标文件无法写入。\n条目："
+                        + describeEntry(currentEntry)
+                        + "\n\n" + ArchiveIO.describe(e)
+                        + "\n\n提示：若目标目录已有同名文件夹，请清理后重试；"
+                        + "若提示权限不足，请在系统设置中授予「所有文件访问」权限。");
             } catch (IOException e) {
-                postError(callback, "I/O error during extraction: " + e.getMessage());
+                postError(callback, "解压失败（读写错误）。\n条目："
+                        + describeEntry(currentEntry)
+                        + "\n\n" + ArchiveIO.describe(e));
+            } catch (Throwable t) {
+                postError(callback, "解压失败。\n条目：" + describeEntry(currentEntry)
+                        + "\n\n" + ArchiveIO.describe(t));
             }
         });
     }
@@ -223,7 +311,7 @@ public class ZipHandler {
         try {
             ZipFile zip = new ZipFile(zipFile);
             return zip.isEncrypted();
-        } catch (ZipException e) {
+        } catch (Throwable e) {
             return false;
         }
     }
@@ -231,6 +319,37 @@ public class ZipHandler {
     // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------
+
+    /** Turns a zip4j failure into something the user can act on. */
+    private String describeZipException(ZipException e, String entryName) {
+        String detail = ArchiveIO.describe(e);
+        String lower = e.getMessage() == null ? "" : e.getMessage().toLowerCase(Locale.ROOT);
+
+        if (e.getType() == ZipException.Type.WRONG_PASSWORD || lower.contains("wrong password")) {
+            return "密码错误，无法解压。\n\n请确认压缩包密码后重试。\n条目：" + describeEntry(entryName);
+        }
+        if (e.getType() == ZipException.Type.CHECKSUM_MISMATCH) {
+            return "解压校验失败（CRC 错误），文件可能已损坏。\n条目：" + describeEntry(entryName)
+                    + "\n\n" + detail;
+        }
+        if (e.getType() == ZipException.Type.UNSUPPORTED_ENCRYPTION) {
+            return "该压缩包使用了不支持的加密方式（如 ZIP 传统加密的变种），无法解压。\n条目："
+                    + describeEntry(entryName) + "\n\n" + detail;
+        }
+        if (e.getType() == ZipException.Type.UNKNOWN_COMPRESSION_METHOD) {
+            return "该条目使用了不支持的压缩算法。\n条目：" + describeEntry(entryName)
+                    + "\n\n" + detail;
+        }
+        if (e.getType() == ZipException.Type.FILE_NOT_FOUND) {
+            return "解压失败：找不到目标文件或路径不可写。\n条目：" + describeEntry(entryName)
+                    + "\n\n" + detail;
+        }
+        return "解压失败。\n条目：" + describeEntry(entryName) + "\n\n" + detail;
+    }
+
+    private static String describeEntry(String entryName) {
+        return (entryName == null || entryName.isEmpty()) ? "（未知）" : entryName;
+    }
 
     private ZipParameters buildZipParameters(int compressionLevel, boolean usePassword) {
         ZipParameters params = new ZipParameters();
@@ -266,6 +385,24 @@ public class ZipHandler {
         }
     }
 
+    /** Recursive size of a file or folder, used to weight the progress of each entry. */
+    private static long sizeOf(File file) {
+        if (file == null) {
+            return 0;
+        }
+        if (file.isDirectory()) {
+            long total = 0;
+            File[] children = file.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    total += sizeOf(child);
+                }
+            }
+            return total;
+        }
+        return file.length();
+    }
+
     private void postProgress(ArchiveCallback callback, int percentage, String currentFile) {
         mainHandler.post(() -> callback.onProgress(percentage, currentFile));
     }
@@ -276,5 +413,57 @@ public class ZipHandler {
 
     private void postError(ArchiveCallback callback, String message) {
         mainHandler.post(() -> callback.onError(message));
+    }
+
+    /**
+     * Polls zip4j's {@link ProgressMonitor} from its own thread while the worker thread runs
+     * the blocking compression calls, and reports the percentage across the whole archive.
+     */
+    private final class ProgressPoller extends Thread {
+
+        private final ZipFile zipFile;
+        private final long totalBytes;
+        private final ArchiveCallback callback;
+
+        private volatile long baseBytes;
+        private volatile long currentBytes = 1;
+        private volatile boolean running = true;
+
+        ProgressPoller(ZipFile zipFile, long totalBytes, ArchiveCallback callback) {
+            super("zip-progress");
+            this.zipFile = zipFile;
+            this.totalBytes = Math.max(1, totalBytes);
+            this.callback = callback;
+            setDaemon(true);
+        }
+
+        /** Called before each entry is added: bytes already done + size of the current entry. */
+        void onEntryStarted(long baseBytes, long currentBytes) {
+            this.baseBytes = baseBytes;
+            this.currentBytes = Math.max(1, currentBytes);
+        }
+
+        void stopPolling() {
+            running = false;
+            interrupt();
+        }
+
+        @Override
+        public void run() {
+            while (running) {
+                ProgressMonitor monitor = zipFile.getProgressMonitor();
+                long done = baseBytes + (long) (currentBytes * (monitor.getPercentDone() / 100.0));
+                int overall = (int) Math.min(99, (done * 100) / totalBytes);
+                String current = monitor.getFileName();
+                postProgress(callback, overall, current != null ? current : "");
+
+                try {
+                    Thread.sleep(PROGRESS_POLL_INTERVAL_MS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+        }
     }
 }

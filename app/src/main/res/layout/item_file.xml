@@ -42,6 +42,17 @@
 
     </LinearLayout>
 
+    <!-- Selection marker for single-select modes (decompress), where no checkbox is used -->
+    <ImageView
+        android:id="@+id/iv_selected_mark"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="@string/picker_selected_mark"
+        android:src="@drawable/ic_check_circle"
+        android:tint="?attr/colorPrimary"
+        android:visibility="gone" />
+
     <!-- Folder only: pick this folder without entering it -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_pick_folder"

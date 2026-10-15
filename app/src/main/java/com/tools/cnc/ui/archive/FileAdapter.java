@@ -14,12 +14,17 @@ import com.tools.cnc.databinding.ItemFileBinding;
 import com.tools.cnc.util.FileUtils;
 
 /**
- * Row list for both the file picker and archive browser.
+ * Row list for the file picker and archive browser.
  *
- * <p>Folder rows separate the two possible intents: tapping the row body enters
- * the folder, tapping the trailing "选择 / 已选" button selects the folder
- * itself for compression. File rows toggle selection directly (with an
- * optional checkbox showing the state).
+ * <p>Three selection affordances exist, and only the ones a mode actually needs are
+ * shown:
+ * <ul>
+ *   <li>folder rows — a trailing "选择 / 已选" button, used when folders can be added
+ *       to a compression list (never in decompress mode);</li>
+ *   <li>file rows — a checkbox, used for multi-select compression;</li>
+ *   <li>file rows — a trailing check mark, used for single-select modes such as
+ *       decompression so the chosen archive is visibly marked.</li>
+ * </ul>
  */
 public class FileAdapter extends ListAdapter<FileItem, FileAdapter.ViewHolder> {
 
@@ -39,6 +44,7 @@ public class FileAdapter extends ListAdapter<FileItem, FileAdapter.ViewHolder> {
 
     private boolean showFileCheckBox = false;
     private boolean folderPickEnabled = false;
+    private boolean showSelectionMark = false;
 
     private OnFileClickListener clickListener;
     private OnFolderPickListener folderPickListener;
@@ -76,10 +82,14 @@ public class FileAdapter extends ListAdapter<FileItem, FileAdapter.ViewHolder> {
     /**
      * @param showFileCheckBox  show a checkbox on file rows (compress mode)
      * @param folderPickEnabled show the trailing select button on folder rows
+     * @param showSelectionMark show a check mark on selected rows (single-select modes)
      */
-    public void configureSelectionUi(boolean showFileCheckBox, boolean folderPickEnabled) {
+    public void configureSelectionUi(boolean showFileCheckBox,
+                                     boolean folderPickEnabled,
+                                     boolean showSelectionMark) {
         this.showFileCheckBox = showFileCheckBox;
         this.folderPickEnabled = folderPickEnabled;
+        this.showSelectionMark = showSelectionMark;
         notifyDataSetChanged();
     }
 
@@ -140,6 +150,10 @@ public class FileAdapter extends ListAdapter<FileItem, FileAdapter.ViewHolder> {
             } else {
                 binding.btnPickFolder.setOnClickListener(null);
             }
+
+            // Check mark for single-select modes: folders are entered, never selected.
+            boolean showMark = showSelectionMark && !isFolder && item.isSelected();
+            binding.ivSelectedMark.setVisibility(showMark ? View.VISIBLE : View.GONE);
 
             boolean showCheckBox = showFileCheckBox && !isFolder;
             binding.cbSelect.setVisibility(showCheckBox ? View.VISIBLE : View.GONE);
