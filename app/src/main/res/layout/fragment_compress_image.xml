@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_select_images"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/select_images"
+        style="@style/Widget.Material3.Button.OutlinedButton" />
+
+    <TextView
+        android:id="@+id/tv_selected_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="13sp"
+        android:textColor="?attr/colorOnSurface"
+        android:alpha="0.7" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/quality"
+        android:textSize="14sp" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/slider_quality"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:valueFrom="10"
+        android:valueTo="100"
+        android:stepSize="5"
+        android:value="75"
+        app:labelBehavior="floating" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/scale"
+        android:textSize="14sp" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/slider_scale"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:valueFrom="10"
+        android:valueTo="100"
+        android:stepSize="5"
+        android:value="100"
+        app:labelBehavior="floating" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_results"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_start_compress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/start_compress"
+        android:enabled="false" />
+
+</LinearLayout>

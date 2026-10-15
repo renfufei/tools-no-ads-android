@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">无广告工具箱</string>
+
+    <!-- Home -->
+    <string name="module_archive">压缩/解压</string>
+    <string name="module_archive_desc">ZIP/RAR压缩解压</string>
+    <string name="module_image">图片工具</string>
+    <string name="module_image_desc">压缩/裁剪/转换</string>
+    <string name="module_filetype">文件识别</string>
+    <string name="module_filetype_desc">识别真实文件类型</string>
+
+    <!-- Archive -->
+    <string name="archive_title">压缩/解压</string>
+    <string name="archive_compress">压缩文件</string>
+    <string name="archive_compress_desc">选择文件或文件夹，打包为 ZIP</string>
+    <string name="archive_decompress">解压文件</string>
+    <string name="archive_decompress_desc">选择 ZIP/RAR 压缩包，解压到本地</string>
+    <string name="picker_hint_compress">点按文件夹可进入 · 点右侧「选择」选中该文件夹</string>
+    <string name="picker_hint_decompress">仅列出 ZIP/RAR 压缩包，点按即可选中</string>
+    <string name="picker_select">选择</string>
+    <string name="picker_selected">已选</string>
+    <string name="picker_title_decompress">选择压缩包</string>
+    <string name="picker_empty_decompress">此目录没有 ZIP/RAR 压缩包</string>
+    <string name="decompress_output_hint">解压到：%s</string>
+    <string name="picker_start_decompress">解压</string>
+    <string name="picker_enter_folder">进入</string>
+    <string name="no_archive_selected">请先选择一个 ZIP/RAR 压缩包</string>
+    <string name="compress">压缩</string>
+    <string name="decompress">解压</string>
+    <string name="select_all">全选</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+    <string name="output_filename">输出文件名</string>
+    <string name="enable_password">启用密码</string>
+    <string name="password">密码</string>
+    <string name="password_hint">输入密码</string>
+    <string name="compression_level">压缩等级</string>
+    <string name="compress_files_title">压缩文件</string>
+    <string name="add_files">添加文件</string>
+    <string name="files_added_count">已添加 %d 个文件</string>
+    <string name="file_picker_title">选择文件</string>
+    <string name="file_picker_confirm">确定</string>
+    <string name="file_picker_selected_count">已选 %d 个</string>
+    <string name="file_picker_empty">当前目录无文件</string>
+    <string name="output_dir">输出目录</string>
+    <string name="compressing">正在压缩…</string>
+    <string name="decompressing">正在解压…</string>
+    <string name="wrong_password">密码错误，请重新输入</string>
+    <string name="file_corrupted">文件已损坏</string>
+    <string name="insufficient_storage">存储空间不足</string>
+    <string name="success">操作成功</string>
+    <string name="error">操作失败</string>
+
+    <!-- Image Tools -->
+    <string name="image_tools_title">图片工具</string>
+    <string name="image_compress">图片压缩</string>
+    <string name="image_compress_desc">调整质量和尺寸</string>
+    <string name="image_crop_border">黑边裁剪</string>
+    <string name="image_crop_border_desc">自动去除黑边框</string>
+    <string name="image_convert">格式转换</string>
+    <string name="image_convert_desc">JPG/PNG/WebP/BMP/HEIC互转</string>
+    <string name="quality">质量</string>
+    <string name="scale">缩放比例</string>
+    <string name="select_images">选择图片</string>
+    <string name="start_compress">开始压缩</string>
+    <string name="sensitivity">灵敏度</string>
+    <string name="preview">预览</string>
+    <string name="crop">裁剪</string>
+    <string name="target_format">目标格式</string>
+    <string name="convert">转换</string>
+    <string name="original_size">原始大小</string>
+    <string name="compressed_size">压缩后大小</string>
+    <string name="heic_not_supported">当前设备不支持HEIC编码</string>
+
+    <!-- File Type -->
+    <string name="filetype_title">文件类型识别</string>
+    <string name="select_files">选择文件</string>
+    <string name="detected_type">检测类型</string>
+    <string name="extension">扩展名</string>
+    <string name="match">匹配</string>
+    <string name="mismatch">不匹配</string>
+    <string name="unknown_type">未知类型</string>
+
+    <!-- QR Code -->
+    <string name="module_qrcode">二维码</string>
+    <string name="module_qrcode_desc">扫码识别/生成</string>
+    <string name="qr_tools_title">二维码</string>
+    <string name="qr_scan">二维码识别</string>
+    <string name="qr_scan_desc">摄像头扫码/相册识别</string>
+    <string name="qr_generate">生成二维码</string>
+    <string name="qr_generate_desc">文本生成/保存/分享</string>
+    <string name="qr_scan_title">二维码识别</string>
+    <string name="qr_generate_title">生成二维码</string>
+    <string name="qr_scan_hint">将二维码对准取景框即可自动识别</string>
+    <string name="qr_pick_gallery">从相册选择</string>
+    <string name="qr_camera_permission_msg">需要相机权限才能扫描二维码，您也可以从相册选择图片识别</string>
+    <string name="qr_camera_permission_grant">授权相机</string>
+    <string name="qr_result_title">识别结果</string>
+    <string name="qr_copy_all">复制全部</string>
+    <string name="qr_open_browser">浏览器中打开</string>
+    <string name="qr_copied">已复制到剪贴板</string>
+    <string name="qr_not_found">未识别到二维码</string>
+    <string name="qr_decode_failed">图片解析失败</string>
+    <string name="qr_generate_input_hint">输入文本或网址</string>
+    <string name="qr_paste_clipboard">粘贴剪贴板</string>
+    <string name="qr_clipboard_empty">剪贴板为空</string>
+    <string name="qr_generate_btn">生成二维码</string>
+    <string name="qr_save">保存到本地</string>
+    <string name="qr_share">分享</string>
+    <string name="qr_saved">已保存：%s</string>
+    <string name="qr_save_failed">保存失败</string>
+    <string name="qr_content_empty">请输入要生成的内容</string>
+    <string name="qr_generate_failed">生成失败，内容可能过长</string>
+    <string name="qr_storage_permission_msg">需要存储权限才能保存二维码图片</string>
+
+    <!-- Permissions -->
+    <string name="permission_required">需要存储权限</string>
+    <string name="permission_rationale">此应用需要访问存储空间来处理文件。</string>
+    <string name="grant_permission">授予权限</string>
+    <string name="open_settings">打开设置</string>
+</resources>

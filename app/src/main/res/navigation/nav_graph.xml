@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.tools.cnc.ui.home.HomeFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_home_to_archive"
+            app:destination="@id/archiveFragment" />
+        <action
+            android:id="@+id/action_home_to_imageTools"
+            app:destination="@id/imageToolsFragment" />
+        <action
+            android:id="@+id/action_home_to_fileType"
+            app:destination="@id/fileTypeFragment" />
+        <action
+            android:id="@+id/action_home_to_qrTools"
+            app:destination="@id/qrToolsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/archiveFragment"
+        android:name="com.tools.cnc.ui.archive.ArchiveFragment"
+        android:label="@string/archive_title"
+        tools:layout="@layout/fragment_archive">
+        <action
+            android:id="@+id/action_archive_to_compressPicker"
+            app:destination="@id/filePickerFragment" />
+        <action
+            android:id="@+id/action_archive_to_decompressPicker"
+            app:destination="@id/filePickerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/compressFragment"
+        android:name="com.tools.cnc.ui.archive.CompressFragment"
+        android:label="@string/compress_files_title"
+        tools:layout="@layout/fragment_compress">
+        <action
+            android:id="@+id/action_compress_to_picker"
+            app:destination="@id/filePickerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/filePickerFragment"
+        android:name="com.tools.cnc.ui.archive.FilePickerFragment"
+        android:label="@string/file_picker_title"
+        tools:layout="@layout/fragment_file_picker">
+        <action
+            android:id="@+id/action_picker_to_compress"
+            app:destination="@id/compressFragment"
+            app:popUpTo="@id/filePickerFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/imageToolsFragment"
+        android:name="com.tools.cnc.ui.image.ImageToolsFragment"
+        android:label="@string/image_tools_title"
+        tools:layout="@layout/fragment_image_tools">
+        <action
+            android:id="@+id/action_imageTools_to_compress"
+            app:destination="@id/compressImageFragment" />
+        <action
+            android:id="@+id/action_imageTools_to_cropBorder"
+            app:destination="@id/cropBorderFragment" />
+        <action
+            android:id="@+id/action_imageTools_to_convertFormat"
+            app:destination="@id/convertFormatFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/compressImageFragment"
+        android:name="com.tools.cnc.ui.image.CompressImageFragment"
+        android:label="@string/image_compress"
+        tools:layout="@layout/fragment_compress_image" />
+
+    <fragment
+        android:id="@+id/cropBorderFragment"
+        android:name="com.tools.cnc.ui.image.CropBorderFragment"
+        android:label="@string/image_crop_border"
+        tools:layout="@layout/fragment_crop_border" />
+
+    <fragment
+        android:id="@+id/convertFormatFragment"
+        android:name="com.tools.cnc.ui.image.ConvertFormatFragment"
+        android:label="@string/image_convert"
+        tools:layout="@layout/fragment_convert_format" />
+
+    <fragment
+        android:id="@+id/fileTypeFragment"
+        android:name="com.tools.cnc.ui.filetype.FileTypeFragment"
+        android:label="@string/filetype_title"
+        tools:layout="@layout/fragment_file_type" />
+
+    <fragment
+        android:id="@+id/qrToolsFragment"
+        android:name="com.tools.cnc.ui.qrcode.QrToolsFragment"
+        android:label="@string/qr_tools_title"
+        tools:layout="@layout/fragment_qr_tools">
+        <action
+            android:id="@+id/action_qrTools_to_scan"
+            app:destination="@id/qrScanFragment" />
+        <action
+            android:id="@+id/action_qrTools_to_generate"
+            app:destination="@id/qrGenerateFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/qrScanFragment"
+        android:name="com.tools.cnc.ui.qrcode.QrScanFragment"
+        android:label="@string/qr_scan_title"
+        tools:layout="@layout/fragment_qr_scan" />
+
+    <fragment
+        android:id="@+id/qrGenerateFragment"
+        android:name="com.tools.cnc.ui.qrcode.QrGenerateFragment"
+        android:label="@string/qr_generate_title"
+        tools:layout="@layout/fragment_qr_generate" />
+</navigation>
