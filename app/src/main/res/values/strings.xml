@@ -38,19 +38,11 @@
     <string name="compress_password_empty">请填写压缩密码</string>
     <string name="compress_level_value">%1$d</string>
     <string name="entry_folder_size">文件夹 · %1$s</string>
-    <string name="decompress_output_hint">解压到：%s</string>
-    <string name="picker_start_decompress">解压</string>
-    <string name="picker_enter_folder">进入</string>
-    <string name="no_archive_selected">请先选择一个 ZIP/RAR 压缩包</string>
-    <string name="compress">压缩</string>
-    <string name="decompress">解压</string>
-    <string name="select_all">全选</string>
     <string name="cancel">取消</string>
     <string name="confirm">确认</string>
     <string name="output_filename">输出文件名</string>
     <string name="enable_password">启用密码</string>
     <string name="password">密码</string>
-    <string name="password_hint">输入密码</string>
     <string name="compression_level">压缩等级</string>
     <string name="compress_files_title">压缩文件</string>
     <string name="add_files">添加文件</string>
@@ -62,9 +54,6 @@
     <string name="output_dir">输出目录</string>
     <string name="compressing">正在压缩…</string>
     <string name="decompressing">正在解压…</string>
-    <string name="wrong_password">密码错误，请重新输入</string>
-    <string name="file_corrupted">文件已损坏</string>
-    <string name="insufficient_storage">存储空间不足</string>
     <string name="success">操作成功</string>
     <string name="error">操作失败</string>
 
@@ -102,23 +91,12 @@
     <string name="scale">缩放比例</string>
     <string name="select_images">选择图片</string>
     <string name="start_compress">开始压缩</string>
-    <string name="sensitivity">灵敏度</string>
-    <string name="preview">预览</string>
-    <string name="crop">裁剪</string>
     <string name="target_format">目标格式</string>
     <string name="convert">转换</string>
-    <string name="original_size">原始大小</string>
-    <string name="compressed_size">压缩后大小</string>
-    <string name="heic_not_supported">当前设备不支持HEIC编码</string>
 
     <!-- File Type -->
     <string name="filetype_title">文件类型识别</string>
     <string name="select_files">选择文件</string>
-    <string name="detected_type">检测类型</string>
-    <string name="extension">扩展名</string>
-    <string name="match">匹配</string>
-    <string name="mismatch">不匹配</string>
-    <string name="unknown_type">未知类型</string>
 
     <!-- QR Code -->
     <string name="module_qrcode">二维码</string>
@@ -139,7 +117,6 @@
     <string name="qr_open_browser">浏览器中打开</string>
     <string name="qr_copied">已复制到剪贴板</string>
     <string name="qr_not_found">未识别到二维码</string>
-    <string name="qr_decode_failed">图片解析失败</string>
     <string name="qr_generate_input_hint">输入文本或网址</string>
     <string name="qr_paste_clipboard">粘贴剪贴板</string>
     <string name="qr_clipboard_empty">剪贴板为空</string>
@@ -170,13 +147,6 @@
     <string name="crop_border_value_plain">%1$d</string>
     <string name="crop_border_value_percent_only">%1$d%%</string>
     <string name="crop_border_auto_done">已识别：上 %1$dpx / 下 %2$dpx，可拖动琥珀色虚线微调</string>
-    <string name="crop_border_auto_failed">识别失败，请手动拖动调整</string>
     <string name="crop_border_no_image">请先选择图片</string>
     <string name="crop_border_saved">已保存：%1$s</string>
-
-    <!-- Permissions -->
-    <string name="permission_required">需要存储权限</string>
-    <string name="permission_rationale">此应用需要访问存储空间来处理文件。</string>
-    <string name="grant_permission">授予权限</string>
-    <string name="open_settings">打开设置</string>
 </resources>
